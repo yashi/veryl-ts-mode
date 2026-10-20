@@ -39,6 +39,13 @@ jobs:
           path: tree-sitter-veryl
           persist-credentials: false
 
+      - name: Checkout package-lint
+        uses: actions/checkout@v7
+        with:
+          repository: purcell/package-lint
+          path: build/package-lint
+          persist-credentials: false
+
       - name: Check tree-sitter runtime
         working-directory: tree-sitter-veryl
         run: |
@@ -56,4 +63,4 @@ jobs:
         run: make grammar GRAMMAR_SRC=tree-sitter-veryl
 
       - name: Compile and test
-        run: make check GRAMMAR_DIR="$PWD/build"
+        run: make lint check GRAMMAR_DIR="$PWD/build"
