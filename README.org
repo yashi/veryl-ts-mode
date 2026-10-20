@@ -130,6 +130,16 @@ make test-package
 These tests install the package in a temporary directory and check its
 autoloads in fresh Emacs processes.
 
+Run ~package-lint~ and ~checkdoc~ before submitting packaging changes:
+
+#+begin_src sh
+git clone https://github.com/purcell/package-lint build/package-lint
+make lint
+#+end_src
+
+To use an existing ~package-lint~ checkout or installation, set
+~PACKAGE_LINT_DIR=/path/to/package-lint~ when running ~make lint~.
+
 CI runs the checks on the Emacs versions configured in
 [[file:.github/workflows/tests.yml][the test workflow]]. Each job builds the grammar
 at a pinned revision. For runtimes that require an older ABI, the job

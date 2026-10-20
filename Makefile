@@ -3,8 +3,9 @@ GRAMMAR_DIR ?=
 GRAMMAR_SRC ?=
 BUILD_DIR ?= build
 GRAMMAR_LIBRARY ?= libtree-sitter-veryl.so
+PACKAGE_LINT_DIR ?= $(BUILD_DIR)/package-lint
 
-.PHONY: check compile test test-package grammar clean
+.PHONY: check compile test test-package lint grammar clean
 
 check: test test-package
 
@@ -21,6 +22,12 @@ test: compile
 test-package:
 	$(EMACS) -Q --batch -l test/veryl-ts-mode-package-test.el \
 		-f ert-run-tests-batch-and-exit
+
+lint:
+	$(EMACS) -Q --batch -L "$(PACKAGE_LINT_DIR)" -l package-lint \
+		-f package-lint-batch-and-exit veryl-ts-mode.el
+	$(EMACS) -Q --batch -l checkdoc \
+		--eval '(let ((checkdoc-create-error-function (lambda (text &rest _) (error "%s" text)))) (checkdoc-file "veryl-ts-mode.el"))'
 
 grammar:
 	test -n "$(GRAMMAR_SRC)"
