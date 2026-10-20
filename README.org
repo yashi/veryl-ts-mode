@@ -125,3 +125,7 @@ CI runs the checks on the Emacs versions configured in
 [[file:.github/workflows/tests.yml][the test workflow]]. Each job builds the grammar
 at a pinned revision. For runtimes that require an older ABI, the job
 regenerates the parser with the tree-sitter CLI.
+
+* License
+
+This package is licensed under GPL-3.0-or-later. See [[file:LICENSE][LICENSE]].
