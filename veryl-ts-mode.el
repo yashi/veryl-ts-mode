@@ -318,9 +318,12 @@ Customize indentation with `veryl-ts-mode-indent-offset'."
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.veryl\\'" . veryl-ts-mode))
 
-(unless (assq 'veryl treesit-language-source-alist)
-  (add-to-list 'treesit-language-source-alist
-               '(veryl "https://github.com/veryl-lang/tree-sitter-veryl")))
+;;;###autoload
+(let ((sources (bound-and-true-p treesit-language-source-alist)))
+  (unless (assq 'veryl sources)
+    (setq treesit-language-source-alist
+          (cons '(veryl "https://github.com/veryl-lang/tree-sitter-veryl")
+                sources))))
 
 (provide 'veryl-ts-mode)
 
