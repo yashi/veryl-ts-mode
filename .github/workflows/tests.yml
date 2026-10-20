@@ -1,0 +1,59 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 10 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        emacs:
+          - '29.4'
+          - '30.2'
+          - '31.1'
+          - snapshot
+    steps:
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs }}
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Checkout grammar
+        uses: actions/checkout@v7
+        with:
+          repository: veryl-lang/tree-sitter-veryl
+          ref: f38156e6fa97e7386cdfbcbcc537dc970a13c3ce
+          path: tree-sitter-veryl
+          persist-credentials: false
+
+      - name: Check tree-sitter runtime
+        working-directory: tree-sitter-veryl
+        run: |
+          abi=$(emacs -Q --batch --eval \
+            "(progn (require 'treesit)
+                    (unless (treesit-available-p)
+                      (error \"Emacs needs tree-sitter support\"))
+                    (princ (treesit-library-abi-version)))")
+          if [ "$abi" -lt 15 ]; then
+            npm exec --yes --package=tree-sitter-cli@0.26.3 -- \
+              tree-sitter generate --abi "$abi"
+          fi
+
+      - name: Build grammar
+        run: make grammar GRAMMAR_SRC=tree-sitter-veryl
+
+      - name: Compile and test
+        run: make check GRAMMAR_DIR="$PWD/build"

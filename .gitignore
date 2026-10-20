@@ -1,1 +1,4 @@
 *~
+*.elc
+/build/
+/tree-sitter-veryl/

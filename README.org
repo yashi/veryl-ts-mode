@@ -1,0 +1,127 @@
+#+title: Veryl mode for Emacs
+
+~veryl-ts-mode~ is an Emacs major mode for [[https://veryl-lang.org/][Veryl]]. It uses the [[https://github.com/veryl-lang/tree-sitter-veryl][Veryl
+tree-sitter grammar]] for syntax highlighting, indentation, Imenu, and
+definition navigation.
+
+* Requirements
+
+- Emacs 29.1 or newer, built with tree-sitter support.
+- A compiled Veryl grammar compatible with Emacs's tree-sitter runtime.
+- Git and a C compiler to install the grammar from source.
+
+The upstream parser uses tree-sitter ABI 15. Your Emacs runtime must support
+that ABI to load the parser. Check the maximum supported ABI with
+~M-: (treesit-library-abi-version)~. For an older runtime,
+[[#build-the-grammar-locally][build a compatible parser locally]].
+
+* Setup
+
+Add this directory to ~load-path~ in your Emacs initialization file:
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "/path/to/veryl-ts-mode")
+(require 'veryl-ts-mode)
+#+end_src
+
+The mode registers the grammar source without replacing an existing Veryl
+entry in ~treesit-language-source-alist~. Install the grammar once:
+
+#+begin_example
+M-x treesit-install-language-grammar RET veryl RET
+#+end_example
+
+Open a ~.veryl~ file to activate the mode. Use ~M-x veryl-ts-mode~ in an
+existing buffer.
+
+* Build the grammar locally
+:PROPERTIES:
+:CUSTOM_ID: build-the-grammar-locally
+:END:
+
+If Emacs reports ABI 14, regenerate and build the parser on Linux.
+Parser regeneration requires Node.js and npm. Start in the ~veryl-ts-mode~
+directory:
+
+#+begin_src sh
+git clone https://github.com/veryl-lang/tree-sitter-veryl
+cd tree-sitter-veryl
+npm exec --yes --package=tree-sitter-cli@0.26.3 -- \
+    tree-sitter generate --abi 14
+cd ..
+make grammar GRAMMAR_SRC=tree-sitter-veryl
+#+end_src
+
+~make grammar~ writes ~build/libtree-sitter-veryl.so~.
+
+Emacs's standard grammar directory is the ~tree-sitter/~ subdirectory of
+~user-emacs-directory~. Check the path with
+~M-: (expand-file-name "tree-sitter/" user-emacs-directory)~.
+
+For a configuration in =~/.emacs.d/=, install the library with:
+
+#+begin_src sh
+mkdir -p ~/.emacs.d/tree-sitter
+cp build/libtree-sitter-veryl.so ~/.emacs.d/tree-sitter/
+#+end_src
+
+If your configuration directory differs, use the path reported by Emacs.
+Emacs searches the standard grammar directory automatically.
+
+For development, you can load the library directly from ~build/~.
+Add the following to your initialization file before opening a Veryl buffer:
+
+#+begin_src emacs-lisp
+(add-to-list 'treesit-extra-load-path "/path/to/veryl-ts-mode/build")
+#+end_src
+
+* Editing
+
+| Command         | Action                                      |
+|-----------------+---------------------------------------------|
+| ~TAB~           | Indent the current line                     |
+| ~C-M-\~         | Indent the region                           |
+| ~M-;~           | Add or remove a comment                     |
+| ~C-M-a~, ~C-M-e~ | Move to the beginning or end of a definition |
+| ~M-x imenu~     | Jump to a declaration                       |
+
+Indentation uses four spaces. The mode disables tabs. The variable
+~veryl-ts-mode-indent-offset~ controls the indentation width.
+
+The mode recognizes line comments, documentation comments, block comments,
+and Veryl numeric literals. Set ~treesit-font-lock-level~ to ~4~ before
+opening a buffer to also color operators, punctuation, and variable uses.
+
+Syntax support follows the installed grammar. The grammar currently lacks
+some language constructs, including generic declarations and explicit
+clock domains. Such constructs can produce incomplete highlighting,
+indentation, or navigation. Embedded code receives string highlighting.
+Indentation preserves the embedded code.
+
+* Development
+
+Run byte compilation and ERT tests with a compatible grammar installed:
+
+#+begin_src sh
+make check
+#+end_src
+
+If the grammar lives outside Emacs's normal search paths, supply its
+library directory:
+
+#+begin_src sh
+make check GRAMMAR_DIR=/path/to/grammar-libraries
+#+end_src
+
+For the local grammar build described above:
+
+#+begin_src sh
+make check GRAMMAR_DIR="$PWD/build"
+#+end_src
+
+The tests require a working grammar and fail if it is unavailable.
+
+CI runs the checks on the Emacs versions configured in
+[[file:.github/workflows/tests.yml][the test workflow]]. Each job builds the grammar
+at a pinned revision. For runtimes that require an older ABI, the job
+regenerates the parser with the tree-sitter CLI.

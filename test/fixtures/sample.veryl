@@ -1,0 +1,99 @@
+import types::*;
+
+package types {
+    type word_t = logic<8>;
+    struct Pair {
+        low: word_t,
+        high: word_t,
+    }
+    enum Phase: logic<2> {
+        Idle,
+        Busy = 1,
+    }
+    function increment (
+        value: input word_t,
+    ) -> word_t {
+        return value + 1;
+    }
+}
+
+interface Link #(
+    param WIDTH: u32 = 8,
+) {
+    var data: logic<WIDTH>;
+    modport source {
+        data: output,
+    }
+}
+
+/// Counts clock cycles.
+#[test(counter)]
+module Counter #(
+    param WIDTH: u32 = 8,
+) (
+    clk: input clock,
+    count: output logic<WIDTH>,
+) {
+    const LIMIT: u32 = 16;
+    var value: logic<WIDTH>;
+    let enabled: bit = true;
+    var pair: types::Pair;
+    inst child: work::Child #(
+        WIDTH: WIDTH,
+    ) (
+        data: value,
+    );
+
+    always_ff (clk) {
+        if_reset {
+            value = '0;
+        } else if enabled {
+            value += 1;
+        } else {
+            value = LIMIT;
+        }
+    }
+
+    always_comb {
+        case value {
+            0: {
+                count = 8'hff;
+            }
+            1, 2: count = value;
+            default: {
+                count = '1;
+            }
+        }
+        switch {
+            enabled: {
+                count = types::increment(
+                    value,
+                );
+            }
+            default: count = 0;
+        }
+        for i: u32 in 0..8 {
+            count[i] = value[i];
+        }
+        pair = {
+            low: value,
+            high: value,
+        };
+        count = {
+            value[3:0] repeat 2,
+        };
+    }
+
+    initial {
+        // Print the initial value.
+        $display("count = %d", value);
+    }
+
+    assign count = value;
+}
+
+embed (inline) sv{{{
+    module helper;
+        initial $display("ready");
+    endmodule
+}}}
