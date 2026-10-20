@@ -119,7 +119,16 @@ For the local grammar build described above:
 make check GRAMMAR_DIR="$PWD/build"
 #+end_src
 
-The tests require a working grammar and fail if it is unavailable.
+The editing tests require a working grammar and fail if it is unavailable.
+
+The package installation tests also run separately, without a grammar:
+
+#+begin_src sh
+make test-package
+#+end_src
+
+These tests install the package in a temporary directory and check its
+autoloads in fresh Emacs processes.
 
 CI runs the checks on the Emacs versions configured in
 [[file:.github/workflows/tests.yml][the test workflow]]. Each job builds the grammar
