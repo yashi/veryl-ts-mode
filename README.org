@@ -77,13 +77,13 @@ Add the following to your initialization file before opening a Veryl buffer:
 
 * Editing
 
-| Command         | Action                                      |
-|-----------------+---------------------------------------------|
-| ~TAB~           | Indent the current line                     |
-| ~C-M-\~         | Indent the region                           |
-| ~M-;~           | Add or remove a comment                     |
+| Command          | Action                                       |
+|------------------+----------------------------------------------|
+| ~TAB~            | Indent the current line                      |
+| ~C-M-\~          | Indent the region                            |
+| ~M-;~            | Add or remove a comment                      |
 | ~C-M-a~, ~C-M-e~ | Move to the beginning or end of a definition |
-| ~M-x imenu~     | Jump to a declaration                       |
+| ~M-x imenu~      | Jump to a declaration                        |
 
 Indentation uses four spaces. The mode disables tabs. The variable
 ~veryl-ts-mode-indent-offset~ controls the indentation width.
