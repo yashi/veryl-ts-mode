@@ -312,7 +312,3 @@ module Sample {
       (font-lock-ensure)
       (indent-region (point-min) (point-max))
       (funcall imenu-create-index-function))))
-
-(provide 'veryl-ts-mode-test)
-
-;;; veryl-ts-mode-test.el ends here
