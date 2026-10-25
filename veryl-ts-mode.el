@@ -3,6 +3,7 @@
 ;; Copyright (C) 2026 Yasushi SHOJI
 
 ;; Author: Yasushi SHOJI <yashi@spacecubics.com>
+;; Assisted-by: Codex:GPT-6
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: languages
